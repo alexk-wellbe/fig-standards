@@ -8,20 +8,23 @@ As also described in the [PSR Workflow Bylaw][workflow]. The Editor, or editors,
 
 ### Accepted
 
-| Num | Title                          | Editor                  |  Coordinator  | Sponsor        |
-|:---:|--------------------------------|-------------------------|---------------|----------------|
-| 1   | [Basic Coding Standard][psr1]  | Paul M. Jones           | _N/A_         | _N/A_          |
-| 2   | [Coding Style Guide][psr2]     | Paul M. Jones           | _N/A_         | _N/A_          |
-| 3   | [Logger Interface][psr3]       | Jordi Boggiano          | _N/A_         | _N/A_          |
-| 4   | [Autoloading Standard][psr4]   | Paul M. Jones           | Phil Sturgeon | Larry Garfield |
-| 6   | [Caching Interface][psr6]      | Larry Garfield          | Paul Dragoonis | Robert Hafner |
-| 7   | [HTTP Message Interface][psr7] | Matthew Weier O'Phinney | Beau Simensen | Paul M. Jones  |
+| Num | Title                          | Editor                         |  Coordinator            | Sponsor          |
+|:---:|--------------------------------|--------------------------------|-------------------------|------------------|
+| 1   | [Basic Coding Standard][psr1]  | Paul M. Jones                  | _N/A_                   | _N/A_            |
+| 2   | [Coding Style Guide][psr2]     | Paul M. Jones                  | _N/A_                   | _N/A_            |
+| 3   | [Logger Interface][psr3]       | Jordi Boggiano                 | _N/A_                   | _N/A_            |
+| 4   | [Autoloading Standard][psr4]   | Paul M. Jones                  | Phil Sturgeon           | Larry Garfield   |
+| 6   | [Caching Interface][psr6]      | Larry Garfield                 | Paul Dragoonis          | Robert Hafner    |
+| 7   | [HTTP Message Interface][psr7] | Matthew Weier O'Phinney        | Beau Simensen           | Paul M. Jones    |
+| 11  | [Container Interface][psr11]   | Matthieu Napoli, David Négrier | Matthew Weier O'Phinney | Korvin Szanto    |
+| 13  | [Hypermedia Links][psr13]      | Larry Garfield                 | Matthew Weier O'Phinney | Marc Alexander   |
+| 16  | [Simple Cache][psr16]          | Paul Dragoonis                 | Jordi Boggiano          | Fabien Potencier |
 
 ### Review
 
 | Num | Title                          | Editor                  |  Coordinator            | Sponsor           |
 |:---:|--------------------------------|-------------------------|-------------------------|-------------------|
-| 13  | [Hypermedia Links][psr13]      | Larry Garfield          | Matthew Weier O'Phinney | Marc Alexander    |
+| N/A | N/A                            | N/A                     | N/A                     | N/A               |
 
 ### Draft
 
@@ -31,11 +34,9 @@ As also described in the [PSR Workflow Bylaw][workflow]. The Editor, or editors,
 | 8   | [Huggable Interface][psr8]           | Larry Garfield                 | Vacant                  | Vacant            |
 | 9   | [Security Advisories][psr9]          | Michael Hess                   | Korvin Szanto           | Larry Garfield    |
 | 10  | [Security Reporting Process][psr10]  | Michael Hess                   | Larry Garfield          | Korvin Szanto     |
-| 11  | [Container Interface][psr11]         | Matthieu Napoli, David Négrier | Paul M. Jones           | Korvin Szanto     |
 | 12  | [Extended Coding Style Guide][psr12] | Korvin Szanto                  | Alexander Makarov       | Robert Deutz      |
 | 14  | [Event Manager][psr14]               | Chuck Reeves                   | Brian Retterer          | Roman Tsiupa      |
 | 15  | [HTTP Middlewares][psr15]            | Woody Gilk                     | Paul M Jones            | Jason Coward      |
-| 16  | [Simple Cache][psr16]                | Paul Dragoonis                 | Jordi Boggiano          | Fabien Potencier  |
 | 17  | [HTTP Factories][psr17]              | Woody Gilk                     | Roman Tsiupa            | Paul M Jones      |
 
 ### Deprecated
@@ -59,12 +60,12 @@ As also described in the [PSR Workflow Bylaw][workflow]. The Editor, or editors,
 | D      | 8   | [Huggable Interface][psr8]           | Larry Garfield                 | Vacant                  | Vacant            |
 | D      | 9   | [Security Advisories][psr9]          | Michael Hess                   | Korvin Szanto           | Larry Garfield    |
 | D      | 10  | [Security Reporting Process][psr10]  | Michael Hess                   | Larry Garfield          | Korvin Szanto     |
-| D      | 11  | [Container Interface][psr11]         | Matthieu Napoli, David Négrier | Paul M. Jones           | Vacant            |
+| A      | 11  | [Container Interface][psr11]         | Matthieu Napoli, David Négrier | Matthew Weier O'Phinney | Korvin Szanto     |
 | D      | 12  | [Extended Coding Style Guide][psr12] | Korvin Szanto                  | Alexander Makarov       | Robert Deutz      |
-| R      | 13  | [Hypermedia Links][psr13]            | Larry Garfield                 | Matthew Weier O'Phinney | Marc Alexander    |
+| A      | 13  | [Hypermedia Links][psr13]            | Larry Garfield                 | Matthew Weier O'Phinney | Marc Alexander    |
 | D      | 14  | [Event Manager][psr14]               | Chuck Reeves                   | Brian Retterer          | Roman Tsiupa      |
 | D      | 15  | [HTTP Middlewares][psr15]            | Woody Gilk                     | Paul M Jones            | Jason Coward      |
-| D      | 16  | [Simple Cache][psr16]                | Paul Dragoonis                 | Jordi Boggiano          | Fabien Potencier  |
+| A      | 16  | [Simple Cache][psr16]                | Paul Dragoonis                 | Jordi Boggiano          | Fabien Potencier  |
 | D      | 17  | [HTTP Factories][psr17]              | Woody Gilk                     | Roman Tsiupa            | Paul M Jones      |
 
 _**Legend:** A = Accepted | D = Draft | R = Review | X = Deprecated_
@@ -81,10 +82,10 @@ _**Legend:** A = Accepted | D = Draft | R = Review | X = Deprecated_
 [psr8]: https://github.com/php-fig/fig-standards/blob/master/proposed/psr-8-hug
 [psr9]: https://github.com/php-fig/fig-standards/blob/master/proposed/security-disclosure-publication.md
 [psr10]: https://github.com/php-fig/fig-standards/blob/master/proposed/security-reporting-process.md
-[psr11]: https://github.com/container-interop/fig-standards/blob/master/proposed/container.md
+[psr11]: /psr/psr-11/
 [psr12]: https://github.com/php-fig/fig-standards/blob/master/proposed/extended-coding-style-guide.md
-[psr13]: https://github.com/php-fig/fig-standards/blob/master/proposed/links.md
+[psr13]: /psr/psr-13/
 [psr14]: https://github.com/php-fig/fig-standards/blob/master/proposed/event-manager.md
 [psr15]: https://github.com/php-fig/fig-standards/blob/master/proposed/http-middleware
-[psr16]: https://github.com/php-fig/fig-standards/blob/master/proposed/simplecache.md
+[psr16]: /psr/psr-16/
 [psr17]: https://github.com/php-fig/fig-standards/tree/master/proposed/http-factory

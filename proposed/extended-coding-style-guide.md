@@ -82,9 +82,9 @@ each word is capitalised including the very first letter.
 
 ### 2.2 Files
 
-All PHP files MUST use the Unix LF (linefeed) line ending.
+All PHP files MUST use the Unix LF (linefeed) line ending only.
 
-All PHP files MUST end with a single line, containing only a single newline (LF) character.
+All PHP files MUST end with a non-blank line, terminated with a single LF.
 
 The closing `?>` tag MUST be omitted from files containing only PHP.
 
@@ -117,10 +117,10 @@ PHP [keywords][] MUST be in lower case.
 The PHP types and keywords `array`, `int`, `true`, `object`, `float`, `false`, `mixed`,
 `bool`, `null`, `numeric`, `string`, `void` and `resource` MUST be in lower case.
 
-Short form of type keywords MUST be used in both code and documentation blocks i.e.
-`bool` instead of `boolean`, `int` instead of `integer` etc.
+Short form of type keywords MUST be used i.e. `bool` instead of `boolean`,
+`int` instead of `integer` etc.
 
-3. Declare Statements, Namespace, and Use Declarations
+3. Declare Statements, Namespace, and Import Statements
 --------------------------------------------
 
 The header of a PHP file may consist of a number of different blocks. If present,
@@ -131,9 +131,9 @@ not relevant may be omitted.
 * File-level docblock.
 * One or more declare statements.
 * The namespace declaration of the file.
-* One or more class-based `use` statements.
-* One or more function-based `use` statements.
-* One or more constant-based `use` statements.
+* One or more class-based `use` import statements.
+* One or more function-based `use` import statements.
+* One or more constant-based `use` import statements.
 * The remainder of the code in the file.
 
 When a file contains a mix of HTML and PHP, any of the above sections may still
@@ -144,6 +144,9 @@ PHP.
 When the opening `<?php` tag is on the first line of the file, it MUST be on its
 own line with no other statements unless it is a file containing markup outside of PHP
 opening and closing tags.
+
+Import statements MUST never begin with a leading backslash as they
+must always be fully qualified.
 
 The following example illustrates a complete list of all blocks:
 
@@ -178,7 +181,7 @@ class FooBar
 
 ~~~
 
-Compound namespaces with a depth of two or more MUST not be used. Therefore the
+Compound namespaces with a depth of more than two MUST NOT be used. Therefore the
 following is the maximum compounding depth allowed:
 ~~~php
 <?php
@@ -208,7 +211,7 @@ the strict types declaration and closing tag.
 
 For example:
 ~~~php
-<?php declare(strict_types=1); ?>
+<?php declare(strict_types=1) ?>
 <html>
 <body>
     <?php
@@ -218,7 +221,8 @@ For example:
 </html>
 ~~~
 
-Declare statements MUST contain no spaces and MUST look like `declare(strict_types=1);`.
+Declare statements MUST contain no spaces and MUST be exactly `declare(strict_types=1)`
+(with an optional semi-colon terminator).
 
 Block declare statements are allowed and MUST be formatted as below. Note position of
 braces and spacing:
@@ -233,7 +237,7 @@ declare(ticks=1) {
 
 The term "class" refers to all classes, interfaces, and traits.
 
-Any closing brace must not be followed by any comment or statement on the
+Any closing brace MUST NOT be followed by any comment or statement on the
 same line.
 
 When instantiating a new class, parenthesis MUST always be present even when
@@ -310,7 +314,7 @@ class ClassName
 ~~~
 
 Each individual Trait that is imported into a class MUST be included
-one-per-line, and each inclusion MUST have its own `use` statement.
+one-per-line, and each inclusion MUST have its own `use` import statement.
 
 ~~~php
 <?php
@@ -328,8 +332,8 @@ class ClassName
 }
 ~~~
 
-When the class has nothing after the `use` declaration, the class
-closing brace MUST be on the next line after the `use` declaration.
+When the class has nothing after the `use` import statement, the class
+closing brace MUST be on the next line after the `use` import statement.
 
 ~~~php
 <?php
@@ -343,7 +347,7 @@ class ClassName
 }
 ~~~
 
-Otherwise it MUST have a blank line after the `use` declaration.
+Otherwise it MUST have a blank line after the `use` import statement.
 
 ~~~php
 <?php
@@ -359,9 +363,29 @@ class ClassName
 }
 ~~~
 
-### 4.3 Properties
+When using the `insteadof` and `as` operators they must be used as follows taking
+note of indentation, spacing and new lines.
+
+
+~~~php
+<?php
+
+class Talker
+{
+    use A, B, C {
+        B::smallTalk insteadof A;
+        A::bigTalk insteadof C;
+        C::mediumTalk as FooBar;
+    }
+}
+~~~
+
+### 4.3 Properties and Constants
 
 Visibility MUST be declared on all properties.
+
+Visibility MUST be declared on all constants if your project PHP minimum
+version supports constant visibilities (PHP 7.1 or later).
 
 The `var` keyword MUST NOT be used to declare a property.
 
@@ -472,7 +496,7 @@ class ClassName
 ~~~
 
 When you have a return type declaration present there MUST be one space after
-the colon with followed by the type declaration. The colon and declaration MUST be
+the colon followed by the type declaration. The colon and declaration MUST be
 on the same line as the argument list closing parentheses with no spaces between
 the two characters. The declaration keyword (e.g. string) MUST be lowercase.
 
@@ -484,7 +508,33 @@ namespace Vendor\Package;
 
 class ReturnTypeVariations
 {
-    public function functionName($arg1, $arg2): string
+    public function functionName(int $arg1, $arg2): string
+    {
+        return 'foo';
+    }
+
+    public function anotherFunction(
+        string $foo,
+        string $bar,
+        int $baz
+    ): string {
+        return 'foo';
+    }
+}
+~~~
+
+In nullable type declarations there MUST not be a space between the question mark
+and the type.
+
+~~~php
+<?php
+declare(strict_types=1);
+
+namespace Vendor\Package;
+
+class ReturnTypeVariations
+{
+    public function functionName(?string $arg1, ?int $arg2): ?bool
     {
         return 'foo';
     }
@@ -703,7 +753,9 @@ try {
 -----------
 All binary and ternary (but not unary) operators MUST be preceded and followed by at least
 one space. This includes all [arithmetic][], [comparison][], [assignment][], [bitwise][],
-[logical][] (excluding `!` which is unary), [string concatenation][], and [type][] operators.
+[logical][] (excluding `!` which is unary), [string concatenation][], [type][] operators,
+trait operators (`insteadof` and `as`), and the single pipe operator (e.g.
+`ExceptionType1 | ExceptionType2 $e`).
 
 Other operators are left undefined.
 

@@ -1,51 +1,75 @@
-PSR-15 Meta Document
-====================
+HTTP Server Request Handlers Meta Document
+==========================================
 
-1. Summary
-----------
+## 1. Summary
 
-The purpose of this PSR is to provide an interface that defines the formal
-method signature for HTTP Middleware that is compatible with HTTP Messages,
-as defined in PSR-7.
+The purpose of this PSR is to define formal interfaces for HTTP server request
+handlers ("request handlers") and HTTP server request middleware ("middleware")
+that are compatible with HTTP messages as defined in [PSR-7][psr7].
 
-2. Why Bother?
---------------
+_Note: All references to "request handlers" and "middleware" are specific to
+**server request** processing._
 
-The general concept of reusable middleware was popularized by [StackPHP][stackphp].
-Since the release of the HTTP Messages standard, a number of frameworks have
-adopted middleware that uses HTTP Message interfaces.
+[psr7]: http://www.php-fig.org/psr/psr-7/
 
-Agreeing on a formal middleware interface eliminates several problems and
-provides a number of benefits:
+## 2. Why Bother?
 
-* Provides a formal standard for middleware developers to commit to.
+The HTTP messages specification does not contain any reference to request
+handlers or middleware.
+
+Request handlers are a fundamental part of any web application. The handler is
+the component that receives a request and produces a response. Nearly all code
+that works with HTTP messages will have some kind of request handler.
+
+[Middleware][middleware] has existed for many years in the PHP ecosystem. The
+general concept of reusable middleware was popularized by [StackPHP][stackphp].
+Since the release of HTTP messages as a PSR many frameworks have adopted
+middleware the use HTTP message interfaces.
+
+Agreeing on formal request handler and middleware interfaces eliminates several
+problems and provides a number of benefits:
+
+* Provides a formal standard for developers to commit to.
+* Enables any middleware component to run in any compatible framework.
 * Eliminates duplication of similar interfaces defined by various frameworks.
 * Avoids minor discrepancies in method signatures.
-* Enables any middleware component to run in any compatible framework.
 
+[middleware]: https://en.wikipedia.org/wiki/Middleware
 [stackphp]: http://stackphp.com/
-[express]: http://expressjs.com/en/guide/writing-middleware.html
 
-3. Scope
---------
+## 3. Scope
 
-## 3.1 Goals
+### 3.1 Goals
 
-* Create a middleware interface that uses HTTP Messages.
-* Provide a suggested interface for middleware stack containers.
-* Ensure that middleware will not be tied to a specific implementation of HTTP Messages.
-* Implement a middleware signature that is based on best practices.
+* Create a request handler interface that uses HTTP messages.
+* Create a middleware interface that uses HTTP messages.
+* Implement request handler and middleware signatures that are based on
+  best practices.
+* Ensure that request handlers and middleware will be compatible with any
+  implementation of HTTP messages.
 
-## 3.2 Non-Goals
+### 3.2 Non-Goals
 
 * Attempting to define the mechanism by which HTTP responses are created.
+* Attempting to define interfaces for client/asynchronous middleware.
+* Attempting to define how middleware is dispatched.
 
-4. Approaches
--------------
+## 4. Request Handler Approaches
 
-There are currently two common approaches to middleware that use HTTP Messages.
+There are many approaches to request handlers that use HTTP messages. However,
+the general process is the same in all of them:
 
-### 4.1 Double Pass
+Given an HTTP request, produce an HTTP response for that request.
+
+The internal requirements of that process will vary from framework to framework
+and application to application. This proposal makes no effort to determine what
+that process should be.
+
+## 5. Middleware Approaches
+
+There are currently two common approaches to middleware that use HTTP messages.
+
+### 5.1 Double Pass
 
 The signature used by most middleware implementations has been mostly the same
 and is based on [Express middleware][express], which is defined as:
@@ -54,14 +78,16 @@ and is based on [Express middleware][express], which is defined as:
 fn(request, response, next): response
 ```
 
+[express]: http://expressjs.com/en/guide/writing-middleware.html
+
 Based on the middleware implementations already used by frameworks that have
 adopted this signature, the following commonalities are observed:
 
-* The middleware is defined as a [callable][php-callable] using `__invoke`.
+* The middleware is defined as a [callable][php-callable].
 * The middleware is passed 3 arguments during invocation:
-  1. A `RequestInterface` implementation.
+  1. A `ServerRequestInterface` implementation.
   2. A `ResponseInterface` implementation.
-  3. A `callable` that receives the request and response to dispatch next middleware.
+  3. A `callable` that receives the request and response to delegate the next middleware.
 
 [php-callable]: http://php.net/manual/language.types.callable.php
 
@@ -69,20 +95,19 @@ A significant number of projects provide and/or use exactly the same interface.
 This approach is often referred to as "double pass" in reference to both the
 request and response being passed to the middleware.
 
-#### 4.1.1 Projects Using Double Pass
+#### 5.1.1 Projects Using Double Pass
 
-* [mindplay/middleman](https://github.com/mindplay-dk/middleman/blob/1.0.0/src/MiddlewareInterface.php#L24)
-* [relay/relay](https://github.com/relayphp/Relay.Relay/blob/1.0.0/src/MiddlewareInterface.php#L24)
-* [slim/slim](https://github.com/slimphp/Slim/blob/3.4.0/Slim/MiddlewareAwareTrait.php#L66-L75)
-* [zendframework/zend-stratigility](https://github.com/zendframework/zend-stratigility/blob/1.0.0/src/MiddlewarePipe.php#L69-L79)
+* [mindplay/middleman v1](https://github.com/mindplay-dk/middleman/blob/1.0.0/src/MiddlewareInterface.php#L24)
+* [relay/relay v1](https://github.com/relayphp/Relay.Relay/blob/1.0.0/src/MiddlewareInterface.php#L24)
+* [slim/slim v3](https://github.com/slimphp/Slim/blob/3.4.0/Slim/MiddlewareAwareTrait.php#L66-L75)
+* [zendframework/zend-stratigility v1](https://github.com/zendframework/zend-stratigility/blob/1.0.0/src/MiddlewarePipe.php#L69-L79)
 
-#### 4.1.2 Middleware Implementing Double Pass
+#### 5.1.2 Middleware Implementing Double Pass
 
 * [bitexpert/adroit](https://github.com/bitExpert/adroit)
 * [akrabat/rka-ip-address-middleware](https://github.com/akrabat/rka-ip-address-middleware)
 * [akrabat/rka-scheme-and-host-detection-middleware](https://github.com/akrabat/rka-scheme-and-host-detection-middleware)
 * [bear/middleware](https://github.com/bearsunday/BEAR.Middleware)
-* [hannesvdvreken/psr7-middlewares](https://github.com/hannesvdvreken/psr7-middlewares)
 * [los/api-problem](https://github.com/Lansoweb/api-problem)
 * [los/los-rate-limit](https://github.com/Lansoweb/LosRateLimit)
 * [monii/monii-action-handler-psr7-middleware](https://github.com/monii/monii-action-handler-psr7-middleware)
@@ -100,16 +125,12 @@ request and response being passed to the middleware.
 * [relay/middleware](https://github.com/relayphp/Relay.Middleware)
 
 The primary downside of this interface is that the while the interface itself is
-a callable, there is currently no way to type hint a closure in a similar way.
-This may be resolved in the future with [functional interfaces][php-functional].
+a callable, there is currently no way to strictly type a closure.
 
-[php-functional]: https://wiki.php.net/rfc/functional-interfaces
-
-### 4.2 Single Pass (Lambda)
+### 5.2 Single Pass (Lambda)
 
 The other approach to middleware is much closer to [StackPHP][stackphp] style
 and is defined as:
-
 
 ```
 fn(request, next): response
@@ -117,110 +138,217 @@ fn(request, next): response
 
 Middleware taking this approach generally has the following commonalities:
 
-* The middleware is defined as a [callable][php-callable] using a [closure][php-closure]
-  or a class with an `__invoke` method.
+* The middleware is defined with a specific interface with a method that takes
+  the request for processing.
 * The middleware is passed 2 arguments during invocation:
-  1. A `RequestInterface` implementation.
-  3. A `callable` that receives the request to dispatch next middleware.
-
+  1. A HTTP request message.
+  2. A request handler to which the middleware can delegate the responsibility
+     of producing an HTTP response message.
 
 In this form, middleware has no access to a response until one is generated by
-innermost middleware. Middleware can then modify the response before returning
-back up the stack.
+the request handler. Middleware can then modify the response before returning it.
 
 This approach is often referred to as "single pass" or "lambda" in reference to
 only the request being passed to the middleware.
 
-[php-closure]: http://php.net/closure
+#### 5.2.1 Projects Using Single Pass
 
-#### 4.2.1 Projects Using Single Pass
+There are fewer examples of this approach within projects using HTTP messages,
+with one notable exception.
 
-There are fewer examples of this approach within projects using HTTP Messages,
-with a couple of notable exceptions.
+[Guzzle middleware][guzzle-middleware] is focused on outgoing (client) requests
+and uses this signature:
 
-[Guzzle middleware](http://docs.guzzlephp.org/en/latest/handlers-and-middleware.html)
-uses a rather unique approach to middleware that is based around generators and
-promises. Ignoring the generator portion, Guzzle middleware has the signature:
-
-```
-function(RequestInterface $request, array $options): ResponseInterface
+```php
+function (RequestInterface $request, array $options): ResponseInterface
 ```
 
-[Laravel middleware](https://laravel.com/docs/master/middleware) does make use
-of HTTP Messages but supports middleware with the signature:
+#### 5.2.2 Additional Projects Using Single Pass
 
+There are also significant projects that predate HTTP messages using this approach.
+
+[StackPHP][stackphp] is based on [Symfony HttpKernel][httpkernel] and supports
+middleware with this signature:
+
+```php
+function handle(Request $request, $type, $catch): Response
 ```
+
+_Note: While Stack has multiple arguments, a response object is not included._
+
+[Laravel middleware][laravel-middleware] uses Symfony components and supports
+middleware with this signature:
+
+```php
 function handle(Request $request, callable $next): Response
 ```
 
-[StackPHP][stackphp] is based specifically around [Symfony HttpKernel][httpkernel]
-and not HTTP Messages but does use a single pass approach:
-
-```php
-handle(Request $request, $type, $catch): Response
-```
-
+[guzzle-middleware]: http://docs.guzzlephp.org/en/latest/handlers-and-middleware.html
 [httpkernel]: https://symfony.com/doc/2.0/components/http_kernel/introduction.html
+[laravel-middleware]: https://laravel.com/docs/master/middleware
 
-### 4.3 Comparison of Approaches
+### 5.3 Comparison of Approaches
 
 The single pass approach to middleware has been well established in the PHP
 community for many years. This is most evident with the large number of packages
 that are based around StackPHP.
 
-The double pass approach is much newer but has already been widely adopted by
-early adopters of HTTP Messages.
+The double pass approach is much newer but has been almost universally used by
+early adopters of HTTP messages (PSR-7).
 
-5. `DelegateInterface`
--------------------
+### 5.4 Chosen Approach
 
-The `$next` argument is a callable in most existing middleware systems. However using
-an interface allows to improve type safety and IDE support.
+Despite the nearly universal adoption of the double-pass approach there are
+significant issues regarding implementation.
 
-Using `__invoke()` as the method name was considered but was not kept. That solution
-would have had the benefit of keeping the existing practice of invoking `$next`
-directly (`$response = $next($request)`). However many existing middleware systems
-already use a class that implements `__invoke()` for the `$next` argument with
-a different signature: `$request` *and* `$response`. By selecting a different method,
-PSR-15 may be implemented within existing systems in parallel with existing features,
-providing a migration path for these libraries and their consumers. In some cases,
-existing `__invoke()` implementations could even proxy to the method defined by
-PSR-15, or vice versa.
+The most severe is that passing an empty response has no guarantees that the
+response is in a usable state. This is further exacerbated by the fact that a
+middleware may modify the response before passing it for further processing.
 
-You can read [the relevant discussion in the mailing list](https://groups.google.com/d/topic/php-fig/V12AAcT_SxE/discussion).
+Further compounding the problem is that there is no way to ensure that the
+response body has not been written to, which can lead to incomplete output or
+error responses being sent with cache headers attached. It is also possible
+to end up with [corrupted body content][rob-allen-filtering] when writing over
+existing body content if the new content is shorter than the original. The most
+effective way to resolve these issues is to always provide a fresh stream when
+modifying the body of a message.
 
+[rob-allen-filtering]: https://akrabat.com/filtering-the-psr-7-body-in-middleware/
 
-6. People
----------
+Some have argued that passing the response helps ensure dependency inversion.
+While it is true that it helps avoid depending on a specific implementation of
+HTTP messages, the problem can also be resolved by injecting factories into the
+middleware to create HTTP message objects, or by injecting empty message instances.
+With the creation of HTTP Factories in [PSR-17][psr17], a standard approach to
+handling dependency inversion is possible.
 
-### 6.1 Editor(s)
+[psr17]: https://github.com/php-fig/fig-standards/blob/master/proposed/http-factory/http-factory-meta.md
 
-* Woody Gilk, <woody.gilk@gmail.com>
+A more subjective, but also important, concern is that existing double-pass
+middleware typically uses the `callable` type hint to refer to middleware.
+This makes strict typing impossible, as there is no assurance that the `callable`
+being passed implements a middleware signature, which reduces runtime safety.
 
-### 6.2 Sponsors
+**Due to these significant issues the lambda approach has been choosen for this proposal.**
 
-* Paul M Jones, <pmjones88@gmail.com> (Coordinator)
-* Jason Coward, <jason@opengeek.com> (Sponsor)
+## 6. Design Decisions
 
-### 6.3 Contributors
+### 6.1 Request Handler Design
 
+The `RequestHandlerInterface` defines a single method that accepts a request and
+MUST return a response. The request handler MAY delegate to another handler.
+
+#### Why is a server request required?
+
+To make it clear that the request handler can only be used in a server side context.
+In an client side context a [promise][promises] would likely be returned instead
+of a response.
+
+[promises]: https://promisesaplus.com/
+
+#### Why the term "handler"?
+
+The term "handler" means something designated to manage or control. In terms of
+request processing, a request handler is the point where the request must be
+acted upon to create a response.
+
+As opposed to the term "delegate", which was used in a previous version of this
+specification, the internal behavior of the this interface is not specified.
+As long as the request handler ultimately produces a response, it is valid.
+
+#### Why doesn't request handler use `__invoke`?
+
+Using `__invoke` is less transparent than using a named method. It also makes
+it easier to call the request handler when it is assigned to a class variable,
+without using `call_user_func` or other less common syntax.
+
+_See "discussion of FrameInterface" in [relevant links](#8-relevant-links) for
+ additional information._
+
+### 6.2 Middleware Design
+
+The `MiddlewareInterface` defines a single method that accepts an HTTP request
+and a request handler and must return a response. The middleware may:
+
+- Evolve the request before passing it to the request handler.
+- Evolve the response received from the request handler before returning it.
+- Create and return a response without passing the request to the request handler,
+  thereby handling the request itself.
+
+#### Why doesn't middleware use `__invoke`?
+
+Doing so would conflict with existing middleware that implements the double-pass
+approach and may want to implement the middleware interface for purposes of
+forwards compatibility with this specification.
+
+#### Why the name `process()`?
+
+We reviewed a number of existing monolithic and middleware frameworks to
+determine what method(s) each defined for processing incoming requests. We found
+the following were commonly used:
+
+- `__invoke` (within middleware systems, such as Slim, Expressive, Relay, etc.)
+- `handle` (in particular, software derived from Symfony's [HttpKernel][HttpKernel])
+- `dispatch` (Zend Framework's [DispatchableInterface][DispatchableInterface])
+
+[HttpKernel]: https://symfony.com/doc/current/components/http_kernel.html
+[DispatchableInterface]: https://github.com/zendframework/zend-stdlib/blob/980ce463c29c1a66c33e0eb67961bba895d0e19e/src/DispatchableInterface.php
+
+We chose to allow a forwards-compatible approach for such classes to repurpose
+themselves as middleware (or middleware compatible with this specification),
+and, as such, needed to choose a name not in common usage. As such, we chose
+`process`, to indicate _processing_ a request.
+
+#### Why is a server request required?
+
+To make it clear that the middleware can only be used in a synchronous, server
+side context.
+
+While not all middleware will need to use the additional methods defined by the
+server request interface, external requests are typically processed asynchronously
+and would typically return a [promise][promises] of a response. (This is primarily
+due to the fact that multiple requests can be made in parallel and processed as
+they are returned.) It is outside the scope of this proposal to address the needs
+of asynchronous request/response life cycles.
+
+Attempting to define client middleware would be premature at this point. Any future
+proposal that is focused on client side request processing should have the opportunity
+to define a standard that is specific to the nature of asynchronous middleware.
+
+_See "client vs server side middleware" in [relevant links](#8-relevant-links) for
+additional information._
+
+## 7. People
+
+This PSR was produced by a FIG Working Group with the following members:
+
+* Matthew Weier O'Phinney (sponsor), <mweierophinney@gmail.com>
+* Woody Gilk (editor), <woody.gilk@gmail.com>
+* Glenn Eggleton
+* Matthieu Napoli
+* Oscar Otero
+* Korvin Szanto
+* Stefano Torresi
+
+The working group would also like to acknowledge the contributions of:
+
+* Jason Coward, <jason@opengeek.com>
+* Paul M Jones, <pmjones88@gmail.com>
 * Rasmus Schultz, <rasmus@mindplay.dk>
 
-7. Votes
---------
+## 8. Votes
 
-* [Entrance Vote](https://groups.google.com/forum/#!topic/php-fig/v9AijALWJhI)
-* **Acceptance Vote:** _(not yet taken)_
+* [Working Group Formation](https://groups.google.com/d/msg/php-fig/rPFRTa0NODU/tIU9BZciAgAJ)
 
-8. Relevant Links
------------------
+## 9. Relevant Links
 
 _**Note:** Order descending chronologically._
 
 * [PHP-FIG mailing list thread](https://groups.google.com/d/msg/php-fig/vTtGxdIuBX8/NXKieN9vDQAJ)
 * [The PHP League middleware proposal](https://groups.google.com/d/msg/thephpleague/jyztj-Nz_rw/I4lHVFigAAAJ)
+* [PHP-FIG discussion of FrameInterface](https://groups.google.com/d/msg/php-fig/V12AAcT_SxE/aRXmNnIVCwAJ)
+* [PHP-FIG discussion about client vs server side middleware](https://groups.google.com/d/msg/php-fig/vBk0BRgDe2s/GTaT0yKNBgAJ)
 
-9. Errata
----------
+## 10. Errata
 
 ...
